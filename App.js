@@ -262,7 +262,7 @@ class App extends React.Component {
                 renderItem={this.AppItem}
               />
             }
-            {/* <View style={{height: 10 }}></View> */}
+            <View style={{height: 80}} />
           </View>
         )}
 
