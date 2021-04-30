@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import RNAndroidNotificationListener from 'react-native-android-notification-listener';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DB from './SQLite';
 
 import styles from './App.styles.js';
 
@@ -25,6 +26,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      notifications: [],
       hasPermission: false,
       notification: {},
     };
@@ -42,6 +44,11 @@ class App extends React.Component {
       this.handleAppStateChange(e);
     });
     this.onStart();
+    const notifications = await DB.SelectQuery();
+    console.log('notifications', notifications);
+    this.setState({
+      notifications: notifications,
+    });
   }
 
   componentWillUnmount() {

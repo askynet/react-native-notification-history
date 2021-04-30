@@ -6,7 +6,7 @@ import {AppRegistry} from 'react-native';
 import {RNAndroidNotificationListenerHeadlessJsName} from 'react-native-android-notification-listener';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SQLite from 'react-native-sqlite-storage';
-
+import DB from './SQLite';
 global.db = SQLite.openDatabase(
   {
     name: 'SQLite',
@@ -64,7 +64,8 @@ const headlessNotificationListener = async ({notification}) => {
      * I'm using AsyncStorage here as an example.
      */
     console.log('notification', notification);
-    await AsyncStorage.setItem('@lastNotification', notification);
+    await DB.CreateTable();
+    await DB.Insertdata([notification]);
   }
 };
 
