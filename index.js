@@ -65,7 +65,7 @@ const headlessNotificationListener = async ({notification}) => {
      */
     console.log('notification', notification);
     await DB.CreateTable();
-    await DB.Insertdata([notification]);
+    await DB.Insertdata([JSON.parse(notification)]);
   }
 };
 

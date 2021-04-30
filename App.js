@@ -179,7 +179,6 @@ class App extends React.Component {
 
   async handleAppStateChange(nextAppState) {
     if (nextAppState === 'active') {
-      console.log('nextAppState', nextAppState);
       /**
        * Check the user current notification permission status
        */
