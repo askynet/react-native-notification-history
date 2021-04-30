@@ -63,9 +63,27 @@ const headlessNotificationListener = async ({notification}) => {
      * Here you could store the notifications in a external API.
      * I'm using AsyncStorage here as an example.
      */
-    console.log('notification', notification);
+    notification = JSON.parse(notification);
+    let item = {...notification};
+    if (item.groupedMessages) {
+      delete item.groupedMessages;
+    }
+    const data = [];
+    if (
+      notification.groupedMessages &&
+      notification.groupedMessages.length !== 0
+    ) {
+      notification.groupedMessages.forEach(element => {
+        item['title'] = element.title;
+        item['text'] = element.text;
+        data.push(item);
+      });
+    } else {
+      data.push(item);
+    }
+    console.log('data', data);
     await DB.CreateTable();
-    await DB.Insertdata([JSON.parse(notification)]);
+    await DB.Insertdata(data);
   }
 };
 

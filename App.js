@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react';
+import DeviceInfo from 'react-native-device-info';
+
 import {
   SafeAreaView,
   Text,
@@ -7,6 +9,10 @@ import {
   AppState,
   View,
   FlatList,
+  TouchableWithoutFeedback,
+  BackHandler,
+  Alert,
+  TouchableOpacity,
 } from 'react-native';
 import RNAndroidNotificationListener from 'react-native-android-notification-listener';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,10 +28,105 @@ const STATUS = {
   UNKNOWN: 'unknown',
 };
 
+const Notification = ({item, index}) => {
+  return (
+    <View style={styles.notificationWrapper}>
+      <View style={styles.notification}>
+        <View style={styles.imagesWrapper}>
+          {!!item.icon && (
+            <View style={styles.notificationIconWrapper}>
+              <Image
+                source={{uri: item.icon}}
+                style={styles.notificationIcon}
+              />
+            </View>
+          )}
+          {!!item.image && (
+            <View style={styles.notificationImageWrapper}>
+              <Image
+                source={{uri: item.image}}
+                style={styles.notificationImage}
+              />
+            </View>
+          )}
+        </View>
+        <View style={styles.notificationInfoWrapper}>
+          {/* <Text>{`app: ${app}`}</Text> */}
+          <Text>
+            <Text>Title</Text> <Text>{`${item.title}`}</Text>
+          </Text>
+          <Text>{`Text: ${item.text}`}</Text>
+          {!!item.time && (
+            <Text style={{fontSize: 12}}>{`${new Date(
+              item.time / 1000,
+            )}`}</Text>
+          )}
+          {!!item.titleBig && <Text>{`TitleBig: ${item.titleBig}`}</Text>}
+          {!!item.subText && <Text>{`SubText: ${item.subText}`}</Text>}
+          {!!item.summaryText && (
+            <Text>{`SummaryText: ${item.summaryText}`}</Text>
+          )}
+          {!!item.bigText && <Text>{`BigText: ${item.bigText}`}</Text>}
+          {!!item.audioContentsURI && (
+            <Text>{`AudioContentsURI: ${item.audioContentsURI}`}</Text>
+          )}
+          {!!item.imageBackgroundURI && (
+            <Text>{`ImageBackgroundURI: ${item.imageBackgroundURI}`}</Text>
+          )}
+          {!!item.extraInfoText && (
+            <Text>{`ExtraInfoText: ${item.extraInfoText}`}</Text>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+};
+
 class App extends React.Component {
+  AppItem = ({item, index}) => {
+    return (
+      <TouchableWithoutFeedback onPress={() => this.actionOnRow(item)}>
+        <View style={styles.notificationWrapper}>
+          <View style={styles.notification}>
+            <View style={styles.imagesWrapper}>
+              {!!item.icon && (
+                <View style={styles.notificationIconWrapper}>
+                  <Image
+                    source={{uri: item.icon}}
+                    style={styles.notificationIcon}
+                  />
+                </View>
+              )}
+              {!!item.image && (
+                <View style={styles.notificationImageWrapper}>
+                  <Image
+                    source={{uri: item.image}}
+                    style={styles.notificationImage}
+                  />
+                </View>
+              )}
+            </View>
+            <View style={styles.notificationInfoWrapper}>
+              {/* <Text>{`app: ${app}`}</Text> */}
+              <Text>
+                <Text>App</Text>{' '}
+                <Text>{`${DeviceInfo.getApplicationName(item.app)}`}</Text>
+              </Text>
+              {!!item.count && <Text style={{fontSize: 12}}>{item.count}</Text>}
+            </View>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    );
+  };
+  changeLisner;
+  backLisner;
   constructor(props) {
     super(props);
     this.state = {
+      appId: '',
+      showDetails: false,
+      apps: [],
       notifications: [],
       hasPermission: false,
       notification: {},
@@ -33,133 +134,160 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
+    
     const status = await RNAndroidNotificationListener.getPermissionStatus();
     console.log(status); // Result can be 'authorized', 'denied' or 'unknown'
     if (status === STATUS.AUTHORIZED) {
       this.setState({
         hasPermission: true,
       });
+      const apps = await DB.getAllApps();
+      this.setState({
+        apps: apps,
+      });
     }
-    AppState.addEventListener('change', e => {
+    this.changeLisner = AppState.addEventListener('change', e => {
       this.handleAppStateChange(e);
     });
+    this.backLisner = BackHandler.addEventListener(
+      'hardwareBackPress',
+      this.onBackPress.bind(this),
+    );
     this.onStart();
-    const notifications = await DB.SelectQuery();
-    console.log('notifications', notifications);
-    this.setState({
-      notifications: notifications,
-    });
   }
 
   componentWillUnmount() {
     AppState.removeEventListener('change', e => {
       this.handleAppStateChange(e);
     });
+    BackHandler.removeEventListener(
+      'hardwareBackPress',
+      this.onBackPress.bind(this),
+    );
     this.onPause();
   }
 
-  Notification({
-    time,
-    app,
-    title,
-    titleBig,
-    text,
-    subText,
-    summaryText,
-    bigText,
-    audioContentsURI,
-    imageBackgroundURI,
-    extraInfoText,
-    icon,
-    image,
-  }) {
-    return (
-      <View style={styles.notificationWrapper}>
-        <View style={styles.notification}>
-          <View style={styles.imagesWrapper}>
-            {!!icon && (
-              <View style={styles.notificationIconWrapper}>
-                <Image source={{uri: icon}} style={styles.notificationIcon} />
-              </View>
-            )}
-            {!!image && (
-              <View style={styles.notificationImageWrapper}>
-                <Image source={{uri: image}} style={styles.notificationImage} />
-              </View>
-            )}
-          </View>
-          <View style={styles.notificationInfoWrapper}>
-            {/* <Text>{`app: ${app}`}</Text> */}
-            <Text>
-              <Text>Title</Text> <Text>{`${title}`}</Text>
-            </Text>
-            <Text>{`Text: ${text}`}</Text>
-            {!!time && (
-              <Text style={{fontSize: 12}}>{`${new Date(time / 1000)}`}</Text>
-            )}
-            {!!titleBig && <Text>{`TitleBig: ${titleBig}`}</Text>}
-            {!!subText && <Text>{`SubText: ${subText}`}</Text>}
-            {!!summaryText && <Text>{`SummaryText: ${summaryText}`}</Text>}
-            {!!bigText && <Text>{`BigText: ${bigText}`}</Text>}
-            {!!audioContentsURI && (
-              <Text>{`AudioContentsURI: ${audioContentsURI}`}</Text>
-            )}
-            {!!imageBackgroundURI && (
-              <Text>{`ImageBackgroundURI: ${imageBackgroundURI}`}</Text>
-            )}
-            {!!extraInfoText && (
-              <Text>{`ExtraInfoText: ${extraInfoText}`}</Text>
-            )}
-          </View>
-        </View>
-      </View>
-    );
+  onBackPress(e) {
+    if (this.state.showDetails) {
+      this.setState({
+        appId: '',
+        showDetails: false,
+        notifications: [],
+      });
+      return true;
+    } else {
+      Alert.alert('Exit App', '', [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            BackHandler.exitApp();
+          },
+        },
+      ]);
+      return true;
+    }
   }
   render() {
-    const hasGroupedMessages =
-      this.state.lastNotification &&
-      this.state.lastNotification.groupedMessages &&
-      this.state.lastNotification.groupedMessages.length > 0;
     return (
       <SafeAreaView style={styles.container}>
         {!this.state.hasPermission && (
           <View style={styles.buttonWrapper}>
             <Text
               style={[
-                styles.permissionStatus,
-                {color: this.state.hasPermission ? 'green' : 'red'},
+                {
+                  color: 'white',
+                  alignSelf: 'center',
+                  marginBottom: 10,
+                  fontSize: 25,
+                },
               ]}>
-              {this.state.hasPermission
-                ? 'Allowed to handle notifications'
-                : 'NOT allowed to handle notifications'}
+              SkyNotify
+            </Text>
+            <Text
+              style={[
+                {
+                  color: 'white',
+                  alignSelf: 'center',
+                  marginBottom: 50,
+                  fontSize: 18,
+                },
+              ]}>
+              Notification History
             </Text>
             <Button
-              title="Open Configuration"
+              title="Enable Permission"
+              borderColor="#2b60f6"
+              borderWidth={1}
+              color="#0f1724"
               onPress={this.handleOnPressPermissionButton}
               disabled={this.state.hasPermission}
             />
           </View>
         )}
-        <View style={styles.notificationsWrapper}>
-          {this.state.notification &&
-            this.state.notification.app &&
-            !hasGroupedMessages &&
-            this.Notification(this.state.notification)}
-          {this.state.notification &&
-            this.state.notification.app &&
-            hasGroupedMessages && (
+
+        {this.state.hasPermission && this.state.apps.length === 0 && (
+          <View style={styles.notificationsWrapper}>
+            <Text>No result found</Text>
+          </View>
+        )}
+
+        {!this.state.showDetails && (
+          <View style={styles.notificationsWrapper}>
+            {
               <FlatList
-                data={this.state.notification.groupedMessages}
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                data={this.state.apps}
                 keyExtractor={(_, index) => index.toString()}
-                renderItem={({item}) => {
-                  this.Notification({
-                    app: this.state.notification.app,
-                    ...item,
-                  });
-                }}
+                renderItem={this.AppItem}
               />
-            )}
-        </View>
+            }
+          </View>
+        )}
+
+        {this.state.showDetails && this.state.notifications && (
+          <View style={styles.notificationsWrapper}>
+            {
+              <FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                data={this.state.notifications}
+                keyExtractor={(_, index) => index.toString()}
+                renderItem={Notification}
+              />
+            }
+          </View>
+        )}
+        {this.state.showDetails && this.state.notifications && (
+          <TouchableOpacity
+            onPress={() => {
+              this.clearAll();
+            }}
+            style={{
+              borderWidth: 1,
+              borderColor: 'red',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 70,
+              position: 'absolute',
+              bottom: 100,
+              right: 10,
+              height: 70,
+              elevation: 3,
+              backgroundColor: 'red',
+              borderRadius: 100,
+            }}>
+            <Image
+              source={require('./images/trash.png')}
+              style={{height: 30, width: 30}}
+            />
+          </TouchableOpacity>
+        )}
       </SafeAreaView>
     );
   }
@@ -171,7 +299,7 @@ class App extends React.Component {
   onStart() {
     this.interval = setInterval(() => {
       this.handleCheckNotificationInterval();
-    }, 1000);
+    }, 5000);
   }
   onPause() {
     clearInterval(this.interval);
@@ -198,12 +326,36 @@ class App extends React.Component {
   }
 
   async handleCheckNotificationInterval() {
-    const lastStoredNotification = await AsyncStorage.getItem(
-      '@lastNotification',
-    );
-    if (lastStoredNotification) {
+    if (this.state.showDetails && this.state.appId) {
+      const nots = await DB.SelectQuery(this.state.appId);
       this.setState({
-        notification: JSON.parse(lastStoredNotification),
+        notifications: nots,
+      });
+    } else {
+      const apps = await DB.getAllApps();
+      this.setState({
+        apps: apps,
+      });
+    }
+  }
+  async actionOnRow(item) {
+    console.log('item', item);
+    this.setState({
+      showDetails: true,
+      appId: item.app,
+    });
+    const nots = await DB.SelectQuery(item.app);
+    this.setState({
+      notifications: nots,
+    });
+  }
+  async clearAll() {
+    console.log('clearAll');
+    if (this.state.appId) {
+      await DB.DeleteQuery(this.state.appId);
+      this.setState({
+        showDetails: false,
+        appId: '',
       });
     }
   }
