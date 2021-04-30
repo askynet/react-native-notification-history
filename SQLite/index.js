@@ -92,7 +92,7 @@ class SQLiteDB {
   async SelectQuery(appid) {
     await this.CreateTable();
     let selectQuery = await executeQuery(
-      'SELECT * FROM notifications where app = ?',
+      'SELECT * FROM notifications where app = ? order by time desc',
       [appid],
     );
     const responseData = [];
@@ -108,7 +108,7 @@ class SQLiteDB {
   async getAllApps() {
     await this.CreateTable();
     let selectQuery = await executeQuery(
-      'SELECT app, icon, COUNT(app) as count FROM notifications GROUP BY app',
+      'SELECT app, icon, COUNT(app) as count FROM notifications GROUP BY app order by time desc',
       [],
     );
     const responseData = [];

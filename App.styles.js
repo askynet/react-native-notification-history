@@ -1,7 +1,7 @@
 import {Dimensions, StyleSheet} from 'react-native';
 
 const {height, width} = Dimensions.get('screen');
-const FORM_HEIGHT = height - 100;
+const FORM_HEIGHT = 200;
 const widthPad = width - 40;
 export default StyleSheet.create({
   container: {
@@ -10,7 +10,6 @@ export default StyleSheet.create({
     height: height,
     width: width,
     backgroundColor: '#000000',
-    // marginTop: height / 2 - FORM_HEIGHT,
   },
   buttonWrapper: {
     alignItems: 'flex-end',
@@ -27,12 +26,13 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 0,
-    height: FORM_HEIGHT,
   },
   notificationWrapper: {
     flexDirection: 'column',
     width: width,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f1724',
+    borderBottomColor: 'black',
+    borderBottomWidth: 1,
     padding: 10,
     borderRadius: 0,
     elevation: 2,
@@ -67,6 +67,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     marginRight: 15,
     justifyContent: 'center',
+    backgroundColor: '#92abcf',
   },
   notificationImage: {
     width: 40,
@@ -77,5 +78,11 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  colorWhite: {
+    color: '#92abcf',
+  },
+  flatlist: {
+    height: FORM_HEIGHT,
   },
 });

@@ -53,11 +53,16 @@ const Notification = ({item, index}) => {
         <View style={styles.notificationInfoWrapper}>
           {/* <Text>{`app: ${app}`}</Text> */}
           <Text>
-            <Text>Title</Text> <Text>{`${item.title}`}</Text>
+            <Text
+              style={[
+                styles.colorWhite,
+                {fontSize: 18},
+              ]}>{`${item.title}`}</Text>
           </Text>
-          <Text>{`Text: ${item.text}`}</Text>
+          <Text
+            style={[styles.colorWhite, {fontSize: 15}]}>{`${item.text}`}</Text>
           {!!item.time && (
-            <Text style={{fontSize: 12}}>{`${new Date(
+            <Text style={[styles.colorWhite, {fontSize: 12}]}>{`${new Date(
               item.time / 1000,
             )}`}</Text>
           )}
@@ -108,11 +113,21 @@ class App extends React.Component {
             </View>
             <View style={styles.notificationInfoWrapper}>
               {/* <Text>{`app: ${app}`}</Text> */}
-              <Text>
-                <Text>App</Text>{' '}
-                <Text>{`${DeviceInfo.getApplicationName(item.app)}`}</Text>
+              <Text lineBreakMode="middle" numberOfLines={1}>
+                <Text
+                  lineBreakMode="middle"
+                  numberOfLines={1}
+                  style={[
+                    styles.colorWhite,
+                    {fontSize: 20},
+                  ]}>{`${this.getAppName(item.app)}`}</Text>
+                <Text>{item.count}</Text>
               </Text>
-              {!!item.count && <Text style={{fontSize: 12}}>{item.count}</Text>}
+              {!!item.count && (
+                <Text style={[styles.colorWhite, {fontSize: 14}]}>
+                  Count: {item.count}
+                </Text>
+              )}
             </View>
           </View>
         </View>
@@ -134,9 +149,8 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
-    
     const status = await RNAndroidNotificationListener.getPermissionStatus();
-    console.log(status); // Result can be 'authorized', 'denied' or 'unknown'
+    //console.log(status); // Result can be 'authorized', 'denied' or 'unknown'
     if (status === STATUS.AUTHORIZED) {
       this.setState({
         hasPermission: true,
@@ -240,6 +254,7 @@ class App extends React.Component {
           <View style={styles.notificationsWrapper}>
             {
               <FlatList
+                style={styles.flatlist}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
                 data={this.state.apps}
@@ -247,6 +262,7 @@ class App extends React.Component {
                 renderItem={this.AppItem}
               />
             }
+            {/* <View style={{height: 10 }}></View> */}
           </View>
         )}
 
@@ -254,6 +270,7 @@ class App extends React.Component {
           <View style={styles.notificationsWrapper}>
             {
               <FlatList
+                style={styles.flatlist}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
                 data={this.state.notifications}
@@ -261,6 +278,7 @@ class App extends React.Component {
                 renderItem={Notification}
               />
             }
+            <View style={{height: 80}} />
           </View>
         )}
         {this.state.showDetails && this.state.notifications && (
@@ -270,7 +288,7 @@ class App extends React.Component {
             }}
             style={{
               borderWidth: 1,
-              borderColor: 'red',
+              borderColor: '#0f1724',
               alignItems: 'center',
               justifyContent: 'center',
               width: 70,
@@ -279,7 +297,7 @@ class App extends React.Component {
               right: 10,
               height: 70,
               elevation: 3,
-              backgroundColor: 'red',
+              backgroundColor: '#92abcf',
               borderRadius: 100,
             }}>
             <Image
@@ -339,7 +357,7 @@ class App extends React.Component {
     }
   }
   async actionOnRow(item) {
-    console.log('item', item);
+    //console.log('item', item);
     this.setState({
       showDetails: true,
       appId: item.app,
@@ -350,14 +368,33 @@ class App extends React.Component {
     });
   }
   async clearAll() {
-    console.log('clearAll');
+    //console.log('clearAll');
     if (this.state.appId) {
-      await DB.DeleteQuery(this.state.appId);
-      this.setState({
-        showDetails: false,
-        appId: '',
-      });
+      Alert.alert('Clear Messages', '', [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: async () => {
+            await DB.DeleteQuery(this.state.appId);
+            this.setState({
+              showDetails: false,
+              appId: '',
+            });
+          },
+        },
+      ]);
     }
+  }
+  getAppName(name) {
+    if (name) {
+      const arr = name.split('.');
+      return arr[arr.length - 1];
+    }
+    return 'App';
   }
 }
 export default App;

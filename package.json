@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "release": "cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.4",
@@ -21,6 +22,7 @@
     "react-native-android-notification-listener": "^3.1.1",
     "react-native-device-info": "^8.1.2",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-installed-apps": "0.0.6",
     "react-native-reanimated": "^2.1.0",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.1.1",
