@@ -61,25 +61,42 @@ const Notification = ({item, index}) => {
           </Text>
           <Text
             style={[styles.colorWhite, {fontSize: 15}]}>{`${item.text}`}</Text>
-          {!!item.time && (
-            <Text style={[styles.colorWhite, {fontSize: 12}]}>{`${new Date(
-              item.time / 1000,
-            )}`}</Text>
+          {!!item.titleBig && (
+            <Text
+              style={styles.colorWhite}>{`TitleBig: ${item.titleBig}`}</Text>
           )}
-          {!!item.titleBig && <Text>{`TitleBig: ${item.titleBig}`}</Text>}
-          {!!item.subText && <Text>{`SubText: ${item.subText}`}</Text>}
+          {!!item.subText && (
+            <Text style={styles.colorWhite}>{`SubText: ${item.subText}`}</Text>
+          )}
           {!!item.summaryText && (
-            <Text>{`SummaryText: ${item.summaryText}`}</Text>
+            <Text
+              style={
+                styles.colorWhite
+              }>{`SummaryText: ${item.summaryText}`}</Text>
           )}
           {!!item.bigText && <Text>{`BigText: ${item.bigText}`}</Text>}
           {!!item.audioContentsURI && (
-            <Text>{`AudioContentsURI: ${item.audioContentsURI}`}</Text>
+            <Text
+              style={
+                styles.colorWhite
+              }>{`AudioContentsURI: ${item.audioContentsURI}`}</Text>
           )}
           {!!item.imageBackgroundURI && (
-            <Text>{`ImageBackgroundURI: ${item.imageBackgroundURI}`}</Text>
+            <Text
+              style={
+                styles.colorWhite
+              }>{`ImageBackgroundURI: ${item.imageBackgroundURI}`}</Text>
           )}
           {!!item.extraInfoText && (
-            <Text>{`ExtraInfoText: ${item.extraInfoText}`}</Text>
+            <Text
+              style={
+                styles.colorWhite
+              }>{`ExtraInfoText: ${item.extraInfoText}`}</Text>
+          )}
+          {!!item.time && (
+            <Text style={[styles.colorWhite, {fontSize: 12}]}>{`${new Date(
+              item.time,
+            )}`}</Text>
           )}
         </View>
       </View>
@@ -159,6 +176,7 @@ class App extends React.Component {
       this.setState({
         apps: apps,
       });
+      console.log('apps', apps);
     }
     this.changeLisner = AppState.addEventListener('change', e => {
       this.handleAppStateChange(e);
@@ -291,18 +309,18 @@ class App extends React.Component {
               borderColor: '#0f1724',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 70,
+              width: 50,
+              height: 50,
               position: 'absolute',
               bottom: 100,
               right: 10,
-              height: 70,
               elevation: 3,
               backgroundColor: '#92abcf',
               borderRadius: 100,
             }}>
             <Image
               source={require('./images/trash.png')}
-              style={{height: 30, width: 30}}
+              style={{height: 25, width: 25}}
             />
           </TouchableOpacity>
         )}
@@ -363,6 +381,7 @@ class App extends React.Component {
       appId: item.app,
     });
     const nots = await DB.SelectQuery(item.app);
+    console.log('nots', nots);
     this.setState({
       notifications: nots,
     });
